@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { imageAPI } from '../../APIservice';
 import Notification from '../Notification'
 import ImageGalleryList from '../ImageGalleryList';
@@ -11,7 +11,6 @@ const { IDLE, PENDING, REJECTED, RESOLVED } = {
     REJECTED: 'rejected',
     RESOLVED: 'resolved',
 }
-// const { IDLE, PENDING, REJECTED, RESOLVED } = status;
 
 function ImageGallery ({searchQuery}) {
 
@@ -21,14 +20,19 @@ function ImageGallery ({searchQuery}) {
     const [page, setPage] = useState(1);
     const [error, setError] = useState('');
 
-    const incrementPage = () => setPage(prev => prev+1);
-
     useEffect(() => {
         resetGallery();
     },[searchQuery])
 
+    const oldQuery = useRef('');
+
     useEffect(() => {
-        if (searchQuery.trim() === '') { return };
+        if (!searchQuery.trim()) { return };
+        if (!oldQuery.current) { oldQuery.current = searchQuery };
+        if (oldQuery.current !== searchQuery) {
+            oldQuery.current = searchQuery;
+            return;
+        }
 
         setStatus(PENDING);
      setTimeout(() => {
@@ -63,14 +67,13 @@ function ImageGallery ({searchQuery}) {
         setError('');
     };
 
+    const incrementPage = () => setPage(prev => prev+1);
+
     const buttonLoadType = () => {
-        let btnType = 'more';
-        if(status === PENDING && page === 1) {btnType = 'spinner'};
-        if (status === PENDING && page>1) { btnType = 'loading' };
-        if (imgFetched.length >= imgTotal) { btnType = 'hidden' };
-        console.log('imgFetched.length', imgFetched.length);
-        console.log('imgTotal', imgTotal);
-        return btnType;
+        if(status === PENDING && page === 1) {return 'spinner'};
+        if (status === PENDING && page>1) { return 'loading' };
+        if (imgFetched.length >= imgTotal) { return 'hidden' };
+        return 'more';
     }
     const buttonType = buttonLoadType();
 
