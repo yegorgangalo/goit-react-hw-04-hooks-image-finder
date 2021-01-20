@@ -6,11 +6,44 @@ const staticFetchOptions = {
 
 const { staticURL, perPage, keyAPI } = staticFetchOptions;
 
-export function imageAPI(query, page) {
+// export function imageAPI(query, page) {
+//   const url = `${staticURL}&q=${query}&page=${page}&per_page=${perPage}&key=${keyAPI}`;
+//   return fetch(url).then(response => {
+//     return response.ok
+//       ? response.json()
+//       : Promise.reject(new Error(`There is no image with tag ${query}`));
+//   });
+// }
+
+export function imageAPI(
+  query,
+  page,
+  setImgFetched,
+  setImgTotal,
+  setStatus,
+  setError,
+  REJECTED,
+  RESOLVED,
+) {
   const url = `${staticURL}&q=${query}&page=${page}&per_page=${perPage}&key=${keyAPI}`;
-  return fetch(url).then(response => {
-    return response.ok
-      ? response.json()
-      : Promise.reject(new Error(`There is no image with tag ${query}`));
-  });
+  fetch(url)
+    .then(response => {
+      return response.ok
+        ? response.json()
+        : Promise.reject(new Error(`There is no image with tag ${query}`));
+    })
+    .then(({ hits, totalHits }) => {
+      if (!hits.length) {
+        return Promise.reject(
+          new Error(`There is no image with tag: ${query}`),
+        );
+      }
+      setImgFetched(prevState => [...prevState, ...hits]);
+      setImgTotal(totalHits);
+      setStatus(RESOLVED);
+    })
+    .catch(error => {
+      setError(error);
+      setStatus(REJECTED);
+    });
 }

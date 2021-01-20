@@ -36,21 +36,31 @@ function ImageGallery({ searchQuery }) {
     oldQuery.current = searchQuery;
     setStatus(PENDING);
     setTimeout(() => {
-      imageAPI(searchQuery, page)
-        .then(({ hits, totalHits }) => {
-          if (hits.length === 0) {
-            return Promise.reject(
-              new Error(`There is no image with tag: ${searchQuery}`),
-            );
-          }
-          setImgFetched(prevState => [...prevState, ...hits]);
-          setImgTotal(totalHits);
-          setStatus(RESOLVED);
-        })
-        .catch(error => {
-          setError(error);
-          setStatus(REJECTED);
-        });
+      imageAPI(
+        searchQuery,
+        page,
+        setImgFetched,
+        setImgTotal,
+        setStatus,
+        setError,
+        REJECTED,
+        RESOLVED,
+      );
+      //   imageAPI(searchQuery, page)
+      //     .then(({ hits, totalHits }) => {
+      //       if (hits.length === 0) {
+      //         return Promise.reject(
+      //           new Error(`There is no image with tag: ${searchQuery}`),
+      //         );
+      //       }
+      //       setImgFetched(prevState => [...prevState, ...hits]);
+      //       setImgTotal(totalHits);
+      //       setStatus(RESOLVED);
+      //     })
+      //     .catch(error => {
+      //       setError(error);
+      //       setStatus(REJECTED);
+      //     });
     }, 500);
   }, [page, searchQuery]);
 
